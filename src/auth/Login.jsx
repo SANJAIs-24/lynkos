@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getCommonStyles } from '../styles';
+import { API_BASE } from '../tunnel'; // Import the bridge configuration
 
 export default function Login({ theme }) {
   const navigate = useNavigate();
@@ -13,7 +14,7 @@ export default function Login({ theme }) {
   const container = {
     minHeight: '100vh',
     width: '100vw',
-    boxSizing: 'border-box', // Prevents padding from breaking width
+    boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -26,45 +27,90 @@ export default function Login({ theme }) {
 
   async function handleLogin(e) {
     e.preventDefault();
-    setMsg('logging in...');
+    setMsg('Connecting to LYNKOS backend...');
+    
     try {
-      const res = await fetch('http://localhost:5000/login', {
+      // We use the dynamic API_BASE (localhost or LocalTunnel)
+      const res = await fetch(`${API_BASE}/login`, {
         method: 'POST',
-        headers: {'Content-Type':'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          // This header bypasses the LocalTunnel "friendly reminder" page
+          'Bypass-Tunnel-Reminder': 'true' 
+        },
         body: JSON.stringify({ id, password })
       });
+
       const data = await res.json();
+
       if (res.ok) {
+        setMsg('Success! Redirecting...');
+        // Store username or token if needed before navigating
         navigate('/desktop'); 
       } else {
-        setMsg(data.error || 'error');
+        // Handle specific errors from your app.py (e.g., 'invalid_credentials')
+        setMsg(data.error || 'Login failed');
       }
     } catch (err) {
-      setMsg('network error');
+      console.error("Fetch error:", err);
+      setMsg('Network error: Is the Python server and Tunnel running?');
     }
   }
 
   return (
     <div style={container}>
       <form onSubmit={handleLogin} style={{ width: '100%', maxWidth: 360 }}>
-        <h2>Login</h2>
+        <h2 style={{ marginBottom: 20, textAlign: 'center' }}>Login</h2>
         
-        <label>Username or Email</label>
-        <input style={styles.input} value={id} onChange={e=>setId(e.target.value)} />
-
-        <div style={{ marginTop: 15 }}>
-          <label>Password</label>
-          <input style={styles.input} type="password" value={password} onChange={e=>setPassword(e.target.value)} />
+        <div style={{ marginBottom: 15 }}>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: '14px' }}>Username or Email</label>
+          <input 
+            style={styles.input} 
+            placeholder="Enter ID"
+            value={id} 
+            onChange={e => setId(e.target.value)} 
+            required
+          />
         </div>
 
-        <button style={{ ...styles.button, marginTop: 20 }} type="submit">Login</button>
+        <div style={{ marginBottom: 5 }}>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: '14px' }}>Password</label>
+          <input 
+            style={styles.input} 
+            type="password" 
+            placeholder="••••••••"
+            value={password} 
+            onChange={e => setPassword(e.target.value)} 
+            required
+          />
+        </div>
+
+        <button 
+          style={{ ...styles.button, marginTop: 20, width: '100%' }} 
+          type="submit"
+        >
+          Login
+        </button>
       </form>
 
-      {msg && <p style={{ marginTop: 12 }}>{msg}</p>}
+      {msg && (
+        <p style={{ 
+          marginTop: 15, 
+          fontSize: '14px', 
+          color: msg.includes('error') ? '#ff6b6b' : 'inherit',
+          textAlign: 'center'
+        }}>
+          {msg}
+        </p>
+      )}
 
-      <div style={{ marginTop: 15, display: 'flex', gap: 10 }}>
-        <Link to="/forgot" style={styles.ghostButton}>Forgot password</Link>
-        <Link to="/signup" style={styles.ghostButton}>Create account</Link>
+      <div style={{ marginTop: 25, display: 'flex', gap: 15, justifyContent: 'center' }}>
+        <Link to="/forgot" style={{ ...styles.ghostButton, fontSize: '13px', textDecoration: 'none' }}>
+          Forgot password?
+        </Link>
+        <Link to="/signup" style={{ ...styles.ghostButton, fontSize: '13px', textDecoration: 'none' }}>
+          Create account
+        </Link>
       </div>
     </div>
   );
