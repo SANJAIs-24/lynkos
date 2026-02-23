@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getCommonStyles } from '../styles';
+import { API_BASE } from '../tunnel'; // Import the bridge configuration
 
 export default function Signup({ theme, setEmailForVerify }) {
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate(); 
   const styles = getCommonStyles(theme);
 
   // State Management
@@ -28,57 +29,66 @@ export default function Signup({ theme, setEmailForVerify }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setMsg('Creating account...');
+    setMsg('Connecting to LYNKOS bridge...');
+    
     try {
-      const res = await fetch('http://localhost:5000/signup', {
+      const res = await fetch(`${API_BASE}/signup`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Bypass-Tunnel-Reminder': 'true' // Vital for LocalTunnel compatibility
+        },
         body: JSON.stringify({ username, email, password })
       });
+      
       const data = await res.json();
       
       if (res.ok) {
-        setEmailForVerify(email); // Set the email for the verify screen
-        navigate('/verify');      // Go to the verify route
+        setEmailForVerify(email); // Pass email to the parent state for the Verify screen
+        navigate('/verify');      // Proceed to OTP verification
       } else {
         setMsg(data.error || 'Signup failed');
       }
     } catch (err) {
-      setMsg('Network error. Is the server running?');
+      console.error("Signup error:", err);
+      setMsg('Network error: Is the Python server and Tunnel running?');
     }
   }
 
   return (
     <div style={containerStyle}>
       <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: 360 }}>
-        <h2 style={{ marginBottom: 20 }}>Create Account</h2>
+        <h2 style={{ marginBottom: 20, textAlign: 'center' }}>Create Account</h2>
         
-        <div>
-          <label>Username</label><br />
+        <div style={{ marginBottom: 15 }}>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: '14px' }}>Username</label>
           <input 
             style={styles.input} 
+            placeholder="Choose a username"
             value={username} 
             onChange={e => setUsername(e.target.value)} 
             required 
           />
         </div>
 
-        <div style={{ marginTop: 15 }}>
-          <label>Email</label><br />
+        <div style={{ marginBottom: 15 }}>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: '14px' }}>Email</label>
           <input 
             style={styles.input} 
             type="email" 
+            placeholder="name@example.com"
             value={email} 
             onChange={e => setEmail(e.target.value)} 
             required 
           />
         </div>
 
-        <div style={{ marginTop: 15 }}>
-          <label>Password</label><br />
+        <div style={{ marginBottom: 15 }}>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: '14px' }}>Password</label>
           <input 
             style={styles.input} 
             type="password" 
+            placeholder="••••••••"
             value={password} 
             onChange={e => setPassword(e.target.value)} 
             required 
@@ -93,9 +103,18 @@ export default function Signup({ theme, setEmailForVerify }) {
         </button>
       </form>
 
-      {msg && <p style={{ marginTop: 16, color: '#ff4d4d' }}>{msg}</p>}
+      {msg && (
+        <p style={{ 
+          marginTop: 16, 
+          fontSize: '14px',
+          textAlign: 'center',
+          color: msg.toLowerCase().includes('error') || msg.toLowerCase().includes('failed') ? '#ff6b6b' : 'inherit' 
+        }}>
+          {msg}
+        </p>
+      )}
 
-      <p style={{ marginTop: 20, fontSize: '0.9rem' }}>
+      <p style={{ marginTop: 20, fontSize: '0.9rem', textAlign: 'center' }}>
         Already have an account?{' '}
         <Link 
           to="/login" 
