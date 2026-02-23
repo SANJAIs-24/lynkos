@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getCommonStyles } from '../styles';
+import { API_BASE } from '../tunnel'; // Import the bridge configuration
 
 export default function Verify({ email, theme }) {
   const navigate = useNavigate();
@@ -25,24 +26,36 @@ export default function Verify({ email, theme }) {
 
   async function handleVerify(e) {
     e.preventDefault();
-    setMsg('Verifying...');
+    
+    if (!email) {
+      setMsg('Error: No email provided. Please go back to signup.');
+      return;
+    }
+
+    setMsg('Verifying with LYNKOS bridge...');
+    
     try {
-      const res = await fetch('http://localhost:5000/verify-otp', {
+      const res = await fetch(`${API_BASE}/verify-otp`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Bypass-Tunnel-Reminder': 'true' // Bypass LocalTunnel landing page
+        },
         body: JSON.stringify({ email, otp })
       });
+
       const data = await res.json();
       
       if (res.ok) {
-        setMsg('Verified successfully!');
+        setMsg('Verified successfully! Taking you to login...');
         // Small delay so the user can see the success message
         setTimeout(() => navigate('/login'), 1500);
       } else {
         setMsg(data.error || 'Verification failed');
       }
     } catch (err) {
-      setMsg('Network error. Check your connection.');
+      console.error("Fetch error:", err);
+      setMsg('Network error: Is the tunnel running?');
     }
   }
 
@@ -52,12 +65,19 @@ export default function Verify({ email, theme }) {
         <h2 style={{ marginBottom: 10 }}>Verify Account</h2>
         <p style={{ marginBottom: 25, fontSize: '0.95rem', opacity: 0.8 }}>
           OTP sent to <br />
-          <strong style={{ color: theme === 'dark' ? '#9fb7ff' : '#0b5fff' }}>{email || 'your email'}</strong>
+          <strong style={{ color: theme === 'dark' ? '#9fb7ff' : '#0b5fff' }}>
+            {email || 'your email'}
+          </strong>
         </p>
 
         <form onSubmit={handleVerify}>
           <input 
-            style={{ ...styles.input, textAlign: 'center', letterSpacing: '4px', fontSize: '1.2rem' }} 
+            style={{ 
+              ...styles.input, 
+              textAlign: 'center', 
+              letterSpacing: '4px', 
+              fontSize: '1.2rem' 
+            }} 
             value={otp} 
             onChange={e => setOtp(e.target.value)} 
             placeholder="000000"
@@ -72,11 +92,27 @@ export default function Verify({ email, theme }) {
           </button>
         </form>
 
-        {msg && <p style={{ marginTop: 15, fontWeight: '500' }}>{msg}</p>}
+        {msg && (
+          <p style={{ 
+            marginTop: 15, 
+            fontWeight: '500',
+            fontSize: '14px',
+            color: msg.toLowerCase().includes('error') || msg.toLowerCase().includes('failed') ? '#ff6b6b' : 'inherit'
+          }}>
+            {msg}
+          </p>
+        )}
 
         <div style={{ marginTop: 30, fontSize: '0.9rem' }}>
           <span>Didn't get a code? </span>
-          <Link to="/signup" style={{ color: theme === 'dark' ? '#9fb7ff' : '#0b5fff', textDecoration: 'none' }}>
+          <Link 
+            to="/signup" 
+            style={{ 
+              color: theme === 'dark' ? '#9fb7ff' : '#0b5fff', 
+              textDecoration: 'none',
+              fontWeight: '600'
+            }}
+          >
             Try again
           </Link>
         </div>
