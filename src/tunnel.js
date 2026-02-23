@@ -8,7 +8,7 @@ const isLocal =
 // 2. The Base URL
 export const API_BASE = isLocal 
   ? "http://localhost:5000" 
-  : "https://lynkos-server.loca.lt"; 
+  : "https://lynkos-be-prod.loca.lt"; // <--- UPDATED THIS LINE
 
 // 3. The Bypass Headers
 export const API_HEADERS = {
@@ -16,7 +16,7 @@ export const API_HEADERS = {
   "Bypass-Tunnel-Reminder": "true"
 };
 
-// 4. The fetchData function (Fixes the build error)
+// 4. The fetchData function
 export async function fetchData(endpoint) {
     try {
         const response = await fetch(`${API_BASE}/${endpoint}`, {
