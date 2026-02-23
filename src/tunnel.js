@@ -1,70 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import Login from './auth/Login';
-import Signup from './auth/Signup';
-import Verify from './auth/Verify';
-import Forgot from './auth/Forgot';
-import { getCommonStyles } from './styles';
-import { API_BASE } from './tunnel'; 
+// src/tunnel.js
 
+// 1. Environment Detection
+// Checks if you are running on your local machine or a public URL (like GitHub Pages)
+const isLocal = 
+  window.location.hostname === "localhost" || 
+  window.location.hostname === "127.0.0.1";
 
+// 2. The Base URL
+// Replace 'lynkos-server' with the subdomain you use in your npx command
+export const API_BASE = isLocal 
+  ? "http://localhost:5000" 
+  : "https://lynkos-server.loca.lt"; 
 
-export default function App() {
-  const [theme, setTheme] = useState(() => {
-    try { return localStorage.getItem('lynkos_theme') || 'dark'; } catch { return 'dark'; }
-  });
-  const [emailForVerify, setEmailForVerify] = useState('');
-  const [isBackendOnline, setIsBackendOnline] = useState(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    try { localStorage.setItem('lynkos_theme', theme); } catch {}
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // Heartbeat check to see if Python server + Tunnel is alive
-  useEffect(() => {
-    fetch(`${API_BASE}/login`, { method: 'OPTIONS' }) 
-      .then(() => setIsBackendOnline(true))
-      .catch(() => setIsBackendOnline(false));
-  }, []);
-
-  const styles = getCommonStyles(theme);
-
-  return (
-    <div style={{
-      minHeight: '100vh', width: '100vw', display: 'flex', alignItems: 'center', 
-      justifyContent: 'center', flexDirection: 'column', position: 'relative',
-      background: theme === 'dark' ? '#0b0f14' : '#f6f7fb',
-      color: theme === 'dark' ? '#e6eef8' : '#0b1220',
-      fontFamily: 'system-ui, sans-serif', margin: 0, padding: 0, boxSizing: 'border-box'
-    }}>
-      
-      {/* Backend Status Badge */}
-      <div style={{ position: 'absolute', top: 20, right: 20, fontSize: '12px' }}>
-        System: {isBackendOnline === null ? "⏳" : isBackendOnline ? "🟢 Online" : "🔴 Offline"}
-      </div>
-
-      <Routes>
-        <Route path="/" element={
-          <div style={{ textAlign: 'center' }}>
-            <h1 style={{ margin: 0, fontSize: '3.5rem' }}>LYNKOS</h1>
-            <p style={{ opacity: 0.7 }}>OS Architecture Active</p>
-            <div style={{ display: 'flex', gap: 12, marginTop: 20, justifyContent: 'center' }}>
-              <button style={styles.button} onClick={() => navigate('/login')}>Enter</button>
-              <button style={styles.smallToggle} onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>
-                Theme: {theme.toUpperCase()}
-              </button>
-            </div>
-          </div>
-        } />
-
-        <Route path="/login" element={<Login theme={theme} setEmailForVerify={setEmailForVerify} />} />
-        <Route path="/signup" element={<Signup theme={theme} setEmailForVerify={setEmailForVerify} />} />
-        <Route path="/verify" element={<Verify theme={theme} email={emailForVerify} />} />
-        <Route path="/forgot" element={<Forgot theme={theme} setEmailForVerify={setEmailForVerify} />} />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    </div>
-  );
-}
+// 3. Optional: Standard Headers
+// LocalTunnel requires this specific header to skip the 'friendly reminder' page
+export const API_HEADERS = {
+  "Content-Type": "application/json",
+  "Bypass-Tunnel-Reminder": "true"
+};
