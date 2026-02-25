@@ -1,31 +1,11 @@
 // src/tunnel.js
+const IS_PRODUCTION = true; // Keep true so GitHub uses the URL below
 
-// 1. Environment Detection
-const isLocal = 
-  window.location.hostname === "localhost" || 
-  window.location.hostname === "127.0.0.1";
+// This is the direct line to your local Flask server
+const PROD_URL = "http://localhost:5000"; 
 
-// 2. The Base URL
-export const API_BASE = isLocal 
-  ? "http://localhost:5000" 
-  : "https://lynkos-be-prod.loca.lt"; // <--- UPDATED THIS LINE
+export const API_BASE = PROD_URL;
 
-// 3. The Bypass Headers
 export const API_HEADERS = {
-  "Content-Type": "application/json",
-  "Bypass-Tunnel-Reminder": "true"
+  'Content-Type': 'application/json'
 };
-
-// 4. The fetchData function
-export async function fetchData(endpoint) {
-    try {
-        const response = await fetch(`${API_BASE}/${endpoint}`, {
-            method: "GET",
-            headers: API_HEADERS
-        });
-        return await response.json();
-    } catch (error) {
-        console.error("Connection failed:", error);
-        throw error;
-    }
-}

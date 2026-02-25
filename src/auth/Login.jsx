@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getCommonStyles } from '../styles';
-import { API_BASE } from '../tunnel'; // Import the bridge configuration
+import { API_BASE } from '../tunnel'; 
 
 export default function Login({ theme }) {
   const navigate = useNavigate();
@@ -11,31 +11,24 @@ export default function Login({ theme }) {
   const [password, setPassword] = useState('');
   const [msg, setMsg] = useState('');
 
-  const container = {
-    minHeight: '100vh',
-    width: '100vw',
-    boxSizing: 'border-box',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-    background: theme === 'dark' ? '#0b0f14' : '#f6f7fb',
-    color: theme === 'dark' ? '#e6eef8' : '#0b1220',
-    fontFamily: 'system-ui, -apple-system, sans-serif'
+  // We removed the 'container' style here because App.jsx now 
+  // wraps this component in a perfectly centered flexbox.
+  const formWrapper = {
+    width: '100%',
+    maxWidth: 360,
+    padding: '20px',
+    boxSizing: 'border-box'
   };
 
   async function handleLogin(e) {
     e.preventDefault();
-    setMsg('Connecting to LYNKOS backend...');
+    setMsg('Connecting to LYNKOS bridge...');
     
     try {
-      // We use the dynamic API_BASE (localhost or LocalTunnel)
       const res = await fetch(`${API_BASE}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // This header bypasses the LocalTunnel "friendly reminder" page
           'Bypass-Tunnel-Reminder': 'true' 
         },
         body: JSON.stringify({ id, password })
@@ -44,11 +37,14 @@ export default function Login({ theme }) {
       const data = await res.json();
 
       if (res.ok) {
-        setMsg('Success! Redirecting...');
-        // Store username or token if needed before navigating
-        navigate('/desktop'); 
+        setMsg('Success! Booting LYNKOS...');
+        
+        // Save user session to localStorage so Desktop.jsx can read it
+        localStorage.setItem('lynkos_user', JSON.stringify(data.user || { name: id }));
+        
+        // Give the user a moment to see the success message
+        setTimeout(() => navigate('/desktop'), 1000); 
       } else {
-        // Handle specific errors from your app.py (e.g., 'invalid_credentials')
         setMsg(data.error || 'Login failed');
       }
     } catch (err) {
@@ -58,12 +54,12 @@ export default function Login({ theme }) {
   }
 
   return (
-    <div style={container}>
-      <form onSubmit={handleLogin} style={{ width: '100%', maxWidth: 360 }}>
-        <h2 style={{ marginBottom: 20, textAlign: 'center' }}>Login</h2>
+    <div style={formWrapper}>
+      <form onSubmit={handleLogin}>
+        <h2 style={{ marginBottom: 20, textAlign: 'center', letterSpacing: '-1px' }}>Login</h2>
         
         <div style={{ marginBottom: 15 }}>
-          <label style={{ display: 'block', marginBottom: 5, fontSize: '14px' }}>Username or Email</label>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: '14px', opacity: 0.8 }}>Username or Email</label>
           <input 
             style={styles.input} 
             placeholder="Enter ID"
@@ -74,7 +70,7 @@ export default function Login({ theme }) {
         </div>
 
         <div style={{ marginBottom: 5 }}>
-          <label style={{ display: 'block', marginBottom: 5, fontSize: '14px' }}>Password</label>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: '14px', opacity: 0.8 }}>Password</label>
           <input 
             style={styles.input} 
             type="password" 
@@ -89,26 +85,34 @@ export default function Login({ theme }) {
           style={{ ...styles.button, marginTop: 20, width: '100%' }} 
           type="submit"
         >
-          Login
+          Login to System
         </button>
       </form>
 
       {msg && (
         <p style={{ 
-          marginTop: 15, 
-          fontSize: '14px', 
-          color: msg.includes('error') ? '#ff6b6b' : 'inherit',
-          textAlign: 'center'
+          marginTop: 20, 
+          fontSize: '13px', 
+          color: msg.toLowerCase().includes('error') || msg.toLowerCase().includes('failed') ? '#ff6b6b' : '#4facfe',
+          textAlign: 'center',
+          fontWeight: '500'
         }}>
           {msg}
         </p>
       )}
 
-      <div style={{ marginTop: 25, display: 'flex', gap: 15, justifyContent: 'center' }}>
-        <Link to="/forgot" style={{ ...styles.ghostButton, fontSize: '13px', textDecoration: 'none' }}>
+      <div style={{ 
+        marginTop: 30, 
+        display: 'flex', 
+        gap: 15, 
+        justifyContent: 'center',
+        borderTop: '1px solid rgba(128,128,128,0.1)',
+        paddingTop: 20
+      }}>
+        <Link to="/forgot" style={{ color: theme === 'dark' ? '#9fb7ff' : '#0b5fff', fontSize: '13px', textDecoration: 'none' }}>
           Forgot password?
         </Link>
-        <Link to="/signup" style={{ ...styles.ghostButton, fontSize: '13px', textDecoration: 'none' }}>
+        <Link to="/signup" style={{ color: theme === 'dark' ? '#9fb7ff' : '#0b5fff', fontSize: '13px', textDecoration: 'none' }}>
           Create account
         </Link>
       </div>
