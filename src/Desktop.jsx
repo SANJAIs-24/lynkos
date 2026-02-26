@@ -40,7 +40,8 @@ import {
   LayoutGrid, Save, FolderOpen, AlertCircle, CheckCircle,
   AlertTriangle, Copy, Inbox, Clock,
 } from 'lucide-react';
-
+// 'Layout' is usually what people mean by 'AlignTop' in a settings UI
+//import { Layout, Settings, User } from 'lucide-react';
 // ─── App imports ──────────────────────────────────────────────────────────────
 import FileManager   from './apps/FileManager.jsx';
 import TextEditor    from './apps/TextEditor.jsx';
