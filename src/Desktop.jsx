@@ -30,18 +30,19 @@ import { format } from 'date-fns';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import {
-  Folder, FileText, Globe, Settings, Volume2, Volume, VolumeX,
-  Battery, Wifi, WifiOff, Search, X, ChevronLeft, ChevronRight,
+  Folder, FileText, Globe,
+  Settings as SettingsIcon, // renamed to avoid clash with SettingsApp component
+  Volume2, Volume, VolumeX,
+  Battery, Wifi, WifiOff, Search, X, ChevronLeft, 
   Trash2, Edit3, Info, RefreshCw, RotateCw,
   FolderPlus, FilePlus, Power, Lock, Palette,
   Maximize, Minimize, HardDrive, Cloud, UploadCloud, DownloadCloud,
   Layers, XSquare, File, Image as ImageIcon, Music,
-  Pin, PinOff, Bell, BellOff, Sun, Bluetooth, Airplay,
+  Pin, PinOff, BellOff, Sun, Bluetooth, Airplay,
   LayoutGrid, Save, FolderOpen, AlertCircle, CheckCircle,
   AlertTriangle, Copy, Inbox, Clock,
 } from 'lucide-react';
-// 'Layout' is usually what people mean by 'AlignTop' in a settings UI
-//import { Layout, Settings, User } from 'lucide-react';
+import { Settings, User, Bell, Shield, ChevronRight } from 'lucide-react';
 // ─── App imports ──────────────────────────────────────────────────────────────
 import FileManager   from './apps/FileManager.jsx';
 import TextEditor    from './apps/TextEditor.jsx';
@@ -802,7 +803,7 @@ const StartMenu = ({ onClose, openApp, user, onSettings, onPower, pinnedApps, se
           <div style={{ fontSize:11, opacity:0.42 }}>{user.role}</div>
         </div>
         <div style={{ marginLeft:'auto', display:'flex', gap:7 }}>
-          <button onClick={onSettings} style={smBtnStyle}><Settings size={12}/>Settings</button>
+          <button onClick={onSettings} style={smBtnStyle}><SettingsIcon size={12}/>Settings</button>
           <button onClick={onPower}    style={{...smBtnStyle, borderColor:'rgba(255,59,48,0.38)', color:'#ff5f56'}}>
             <Power size={12}/>Power
           </button>

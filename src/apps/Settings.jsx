@@ -2,13 +2,20 @@
  * Settings App for LynkOS
  */
 
+// import React, { useState } from 'react';
+// import { Cloud, Palette, Info } from 'lucide-react';
+// import axios from 'axios';
+// import './Apps.css';
+
+// const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 import React, { useState } from 'react';
 import { Cloud, Palette, Info } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE } from '../tunnel'; // Import our smart URL switcher
 import './Apps.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-
+// Use the smart URL from tunnel.js
+const API_URL = `${API_BASE}/api`;
 const WALLPAPERS = {
   "Vanta Waves": "vanta",
   "Midnight City": "linear-gradient(to bottom, #232526, #414345)",
