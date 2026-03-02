@@ -2,7 +2,7 @@ export function getCommonStyles(theme) {
   const inputBorder = theme === 'dark' ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.12)';
   const bg = theme === 'dark' ? '#0f1418' : '#ffffff';
   const color = theme === 'dark' ? '#e6eef8' : '#0b1220';
-
+  
   const input = {
     padding: '8px 10px',
     borderRadius: 6,
@@ -17,7 +17,7 @@ export function getCommonStyles(theme) {
     WebkitAppearance: 'none',
     MozAppearance: 'none',
   };
-
+  
   const button = {
     padding: '10px 14px',
     borderRadius: 8,
@@ -30,7 +30,7 @@ export function getCommonStyles(theme) {
     WebkitAppearance: 'none',
     MozAppearance: 'none',
   };
-
+  
   const ghostButton = {
     padding: '10px 14px',
     borderRadius: 8,
@@ -43,7 +43,7 @@ export function getCommonStyles(theme) {
     WebkitAppearance: 'none',
     MozAppearance: 'none',
   };
-
+  
   const smallToggle = {
     padding: '8px 12px',
     borderRadius: 8,
@@ -54,6 +54,19 @@ export function getCommonStyles(theme) {
     outline: 'none',
     boxShadow: 'none',
   };
-
-  return { input, button, ghostButton, smallToggle, bg, color };
+  
+  // CSS styles that should be injected as a style tag
+  const cssStyles = `
+    .toogle-scene {
+      overflow: visible !important;
+      height: 50vmin;
+      position: absolute;
+    }
+    .toogle-scene_cord {
+      stroke: var(--cord);
+      cursor: move;
+    }
+  `;
+  
+  return { input, button, ghostButton, smallToggle, bg, color, cssStyles };
 }
